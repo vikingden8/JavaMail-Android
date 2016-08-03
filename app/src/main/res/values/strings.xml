@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">JavaMail-Android</string>
+    <string name="simple_text_mail">Simple Text Mail</string>
+</resources>
