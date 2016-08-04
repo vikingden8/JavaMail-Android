@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">JavaMail-Android</string>
     <string name="simple_text_mail">Simple Text Mail</string>
+    <string name="simple_text_mail_multi_receiver">Simple text mail with multi receiver</string>
+    <string name="simple_text_mail_cC">Simple text mail cC</string>
+    <string name="mail_with_attachment">Mail with attachment</string>
 </resources>

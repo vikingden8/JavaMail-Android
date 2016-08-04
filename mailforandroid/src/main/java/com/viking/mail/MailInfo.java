@@ -49,6 +49,8 @@ public class MailInfo {
 
     private String content ;
 
+    private String[] attachments ;
+
     private MailListener mailListener ;
 
     public MailInfo(String username ,String passcode){
@@ -134,6 +136,14 @@ public class MailInfo {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String[] getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(String[] attachments) {
+        this.attachments = attachments;
     }
 
     public void setMailListener(MailListener listener){

@@ -15,16 +15,27 @@
  */
 package com.viking.mail;
 
+import android.util.Log;
+
+import java.io.File;
 import java.util.Date;
 import java.util.Properties;
 
 import javax.activation.CommandMap;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.activation.MailcapCommandMap;
 import javax.mail.Address;
+import javax.mail.BodyPart;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 
 /**
  * class for set mail properties and send function
@@ -69,11 +80,35 @@ public class Mail {
             if (mailInfo.getSubject() != null){
                 msg.setSubject(mailInfo.getSubject());
             }
-
+            Multipart mainPart = new MimeMultipart();
             if (mailInfo.getContent() != null){
-                msg.setText(mailInfo.getContent());
+                    BodyPart html = new MimeBodyPart();
+                    html.setContent(mailInfo.getContent(), "text/html; charset=UTF-8");
+                    mainPart.addBodyPart(html);
             }
 
+            if (mailInfo.getAttachments() != null){
+                for (String attachment : mailInfo.getAttachments()){
+                    File attachFile = new File(attachment) ;
+                    if (attachFile.exists()){
+                        Log.i("viking" , "file exitst : " + attachFile.getName()) ;
+                        BodyPart attachmentBodyPart = new MimeBodyPart();
+                        DataSource source = new FileDataSource(attachment);
+                        attachmentBodyPart.setDataHandler(new DataHandler(source));
+
+                        // 网上流传的解决文件名乱码的方法，其实用MimeUtility.encodeWord就可以很方便的搞定
+                        // 这里很重要，通过下面的Base64编码的转换可以保证你的中文附件标题名在发送时不会变成乱码
+                        //sun.misc.BASE64Encoder enc = new sun.misc.BASE64Encoder();
+                        //messageBodyPart.setFileName("=?GBK?B?" + enc.encode(attachment.getName().getBytes()) + "?=");
+
+                        //MimeUtility.encodeWord可以避免文件名乱码
+                        attachmentBodyPart.setFileName(MimeUtility.encodeWord(attachFile.getName()));
+                        mainPart.addBodyPart(attachmentBodyPart);
+                    }
+                }
+            }
+
+            msg.setContent(mainPart);
             msg.setSentDate(new Date());
 
             // send email
@@ -151,6 +186,8 @@ public class Mail {
 
         private String content ;
 
+        private String[] attachments ;
+
         private MailListener mailListener ;
 
         //TODO maybe html or attachment
@@ -196,7 +233,7 @@ public class Mail {
         }
 
         public Builder withCcs(String cc){
-            this.cC = cC ;
+            this.cC = cc ;
             return this ;
         }
 
@@ -207,6 +244,11 @@ public class Mail {
 
         public Builder withContent(String content){
             this.content = content ;
+            return this ;
+        }
+
+        public Builder withAttachments(String[] attachments){
+            this.attachments = attachments ;
             return this ;
         }
 
@@ -281,6 +323,10 @@ public class Mail {
 
                 if (content != null){
                     mailInfo.setContent(content);
+                }
+
+                if (attachments != null){
+                    mailInfo.setAttachments(attachments);
                 }
 
                 if (mailListener != null){
